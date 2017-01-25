@@ -7,6 +7,7 @@ BuildArch:	noarch
 Group:		System Environment/Base
 License:	LGPL/ASL2
 Source0:	%{name}-%{version}.tar.gz
+Patch1:	wok-2.3.1-pidof-friendly.patch
 Requires:	gettext
 Requires:	python-cherrypy >= 3.2.0
 Requires:	python-cheetah
@@ -52,7 +53,8 @@ Wok is Webserver Originated from Kimchi.
 
 
 %prep
-%setup
+%setup -q
+%patch1 -p1 -b .pidof
 
 
 %build

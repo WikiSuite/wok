@@ -1,0 +1,9 @@
+diff -rup wok-2.3.1/src/wokd.in wok-2.3.1-pidof-friendly/src/wokd.in
+--- wok-2.3.1/src/wokd.in	2016-12-15 08:10:19.000000000 -0500
++++ wok-2.3.1-pidof-friendly/src/wokd.in	2017-01-25 14:19:51.736939287 -0500
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env python2
++#!/usr/bin/python2
+ #
+ # Project Wok
+ #
