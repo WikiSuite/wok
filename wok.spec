@@ -36,9 +36,6 @@ Requires:	systemd
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
-%endif
-
-%if 0%{?with_systemd}
 BuildRequires: systemd-units
 %endif
 
