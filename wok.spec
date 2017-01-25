@@ -21,21 +21,15 @@ Requires:	python-psutil >= 0.6.0
 Requires:	fontawesome-fonts
 Requires:	open-sans-fonts
 Requires:	logrotate
+BuildRequires:  automake
+BuildRequires:  autoconf
 BuildRequires:  firewalld
 BuildRequires:	gettext-devel
 BuildRequires:	libxslt
 BuildRequires:	openssl
 BuildRequires:	python-lxml
 
-%if 0%{?fedora} >= 15 || 0%{?rhel} >= 7
 %global with_systemd 1
-%endif
-
-%if 0%{?rhel} == 6
-Requires:	python-ordereddict
-Requires:	python-imaging
-BuildRequires:    python-unittest2
-%endif
 
 %if 0%{?with_systemd}
 Requires:	systemd
