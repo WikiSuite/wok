@@ -38,7 +38,6 @@ BuildRequires:    python-unittest2
 
 %if 0%{?with_systemd}
 Requires:	systemd
-Requires:	firewalld
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
@@ -138,6 +137,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Jan 24 2016 eGloo <developer@egloo.ca> 2.3.1
+- First build
+
 * Fri Jun 19 2015 Lucio Correia <luciojhc@linux.vnet.ibm.com> 2.0
 - Rename to wokd
 - Remove kimchi specifics
