@@ -1,5 +1,5 @@
 Name:		wok
-Version:	2.3.1
+Version:	2.5.0
 Release:	0%{?dist}
 Summary:	Wok - Webserver Originated from Kimchi
 BuildRoot:	%{_topdir}/BUILD/%{name}-%{version}-%{release}
@@ -18,15 +18,13 @@ Requires:	python-lxml
 Requires:	nginx
 Requires:	python-ldap
 Requires:	python-psutil >= 0.6.0
-Requires:	fontawesome-fonts
-Requires:	open-sans-fonts
 Requires:	logrotate
+Requires:	openssl
+Requires:	python-websockify
 BuildRequires:  automake
 BuildRequires:  autoconf
-BuildRequires:  firewalld
 BuildRequires:	gettext-devel
 BuildRequires:	libxslt
-BuildRequires:	openssl
 BuildRequires:	python-lxml
 
 %global with_systemd 1
@@ -36,6 +34,9 @@ Requires:	systemd
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
+%endif
+
+%if 0%{?with_systemd}
 BuildRequires: systemd-units
 %endif
 
@@ -69,27 +70,33 @@ install -Dm 0755 contrib/wokd.sysvinit %{buildroot}%{_initrddir}/wokd
 
 %post
 if [ $1 -eq 1 ] ; then
-    /bin/systemctl enable wokd.service >/dev/null 2>&1 || :
+    if [ ! -e /etc/wok/dhparams.pem ]; then
+        openssl dhparam -dsaparam -out /etc/wok/dhparams.pem 2048 >/dev/null 2>&1 || :
+    fi
+    if [ ! -e /etc/wok/wok-key.pem ] || [ ! -e /etc/wok/wok-cert.pem ]; then
+        openssl req -x509 -newkey rsa:4096 -keyout /etc/wok/wok-key.pem -out /etc/wok/wok-cert.pem -days 365 -nodes -subj "/C=US/CN=wok/O=kimchi-project.org" >/dev/null 2>&1 || :
+    fi
     # Initial installation
+    /bin/systemctl enable wokd.service >/dev/null 2>&1 || :
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
 
-
 %preun
-
 if [ $1 -eq 0 ] ; then
     # Package removal, not upgrade
     /bin/systemctl --no-reload disable wokd.service > /dev/null 2>&1 || :
     /bin/systemctl stop wokd.service > /dev/null 2>&1 || :
 fi
-
 exit 0
 
 
 %postun
 if [ "$1" -ge 1 ] ; then
     /bin/systemctl try-restart wokd.service >/dev/null 2>&1 || :
+else
+    rm /etc/wok/wok-key.pem /etc/wok/wok-cert.pem
 fi
+
 exit 0
 
 %clean
@@ -106,9 +113,9 @@ rm -rf $RPM_BUILD_ROOT
 %{python_sitelib}/wok/plugins/*.py*
 %{python_sitelib}/wok/
 %{_prefix}/share/locale/*/LC_MESSAGES/wok.mo
+%{_prefix}/lib/firewalld/services/wokd.xml
 %{_datadir}/wok/ui/
 %{_datadir}/wok
-%{_sysconfdir}/nginx/conf.d/wok.conf.in
 %{_sysconfdir}/wok/wok.conf
 %{_sysconfdir}/wok/
 %{_sysconfdir}/logrotate.d/wokd
@@ -120,7 +127,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_localstatedir}/log/wok/*
 %{_localstatedir}/log/wok/
 %{_unitdir}/wokd.service
-%{_prefix}/lib/firewalld/services/wokd.xml
 %endif
 %if 0%{?rhel} == 6
 /etc/init/wokd.conf
@@ -130,6 +136,9 @@ rm -rf $RPM_BUILD_ROOT
 %endif
 
 %changelog
+* Tue Nov 14 2017 eGloo <developer@egloo.ca> 2.5.0
+- Build 2.5.0
+
 * Tue Jan 24 2017 eGloo <developer@egloo.ca> 2.3.1
 - First build
 
