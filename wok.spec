@@ -1,6 +1,6 @@
 Name:		wok
 Version:	2.5.0
-Release:	0%{?dist}
+Release:	1%{?dist}
 Summary:	Wok - Webserver Originated from Kimchi
 BuildRoot:	%{_topdir}/BUILD/%{name}-%{version}-%{release}
 BuildArch:	noarch
@@ -69,13 +69,14 @@ install -Dm 0755 contrib/wokd.sysvinit %{buildroot}%{_initrddir}/wokd
 %endif
 
 %post
+if [ ! -e /etc/wok/dhparams.pem ]; then
+    openssl dhparam -dsaparam -out /etc/wok/dhparams.pem 2048 >/dev/null 2>&1 || :
+fi
+if [ ! -e /etc/wok/wok-key.pem ] || [ ! -e /etc/wok/wok-cert.pem ]; then
+    openssl req -x509 -newkey rsa:4096 -keyout /etc/wok/wok-key.pem -out /etc/wok/wok-cert.pem -days 365 -nodes -subj "/C=US/CN=wok/O=kimchi-project.org" >/dev/null 2>&1 || :
+fi
+
 if [ $1 -eq 1 ] ; then
-    if [ ! -e /etc/wok/dhparams.pem ]; then
-        openssl dhparam -dsaparam -out /etc/wok/dhparams.pem 2048 >/dev/null 2>&1 || :
-    fi
-    if [ ! -e /etc/wok/wok-key.pem ] || [ ! -e /etc/wok/wok-cert.pem ]; then
-        openssl req -x509 -newkey rsa:4096 -keyout /etc/wok/wok-key.pem -out /etc/wok/wok-cert.pem -days 365 -nodes -subj "/C=US/CN=wok/O=kimchi-project.org" >/dev/null 2>&1 || :
-    fi
     # Initial installation
     /bin/systemctl enable wokd.service >/dev/null 2>&1 || :
     /bin/systemctl daemon-reload >/dev/null 2>&1 || :
@@ -116,8 +117,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_prefix}/lib/firewalld/services/wokd.xml
 %{_datadir}/wok/ui/
 %{_datadir}/wok
-%{_sysconfdir}/wok/wok.conf
-%{_sysconfdir}/wok/
+%config(noreplace) %{_sysconfdir}/wok/wok.conf
+%dir %{_sysconfdir}/wok/
 %{_sysconfdir}/logrotate.d/wokd
 %{_mandir}/man8/wokd.8.gz
 
@@ -125,7 +126,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/nginx/conf.d/wok.conf
 %{_sharedstatedir}/wok/
 %{_localstatedir}/log/wok/*
-%{_localstatedir}/log/wok/
+%dir %{_localstatedir}/log/wok/
 %{_unitdir}/wokd.service
 %endif
 %if 0%{?rhel} == 6
