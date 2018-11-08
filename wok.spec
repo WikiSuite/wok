@@ -1,6 +1,6 @@
 Name:		wok
 Version:	2.5.0
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	Wok - Webserver Originated from Kimchi
 BuildRoot:	%{_topdir}/BUILD/%{name}-%{version}-%{release}
 BuildArch:	noarch
@@ -21,6 +21,7 @@ Requires:	python-psutil >= 0.6.0
 Requires:	logrotate
 Requires:	openssl
 Requires:	python-websockify
+Requires:	fontawesome-fonts
 BuildRequires:  automake
 BuildRequires:  autoconf
 BuildRequires:	gettext-devel
